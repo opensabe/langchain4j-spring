@@ -8,12 +8,14 @@ import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 
 import java.util.List;
 
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
 
-class AiServiceFactory implements FactoryBean<Object> {
+class AiServiceFactory implements FactoryBean<Object>, EnvironmentAware {
 
     private final Class<Object> aiServiceClass;
     private ChatLanguageModel chatLanguageModel;
@@ -23,6 +25,7 @@ class AiServiceFactory implements FactoryBean<Object> {
     private ContentRetriever contentRetriever;
     private RetrievalAugmentor retrievalAugmentor;
     private List<Object> tools;
+    private Environment environment;
 
     public AiServiceFactory(Class<Object> aiServiceClass) {
         this.aiServiceClass = aiServiceClass;
@@ -56,6 +59,10 @@ class AiServiceFactory implements FactoryBean<Object> {
         this.tools = tools;
     }
 
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
     @Override
     public Object getObject() {
 
@@ -86,6 +93,8 @@ class AiServiceFactory implements FactoryBean<Object> {
         if (!isNullOrEmpty(tools)) {
             builder = builder.tools(tools);
         }
+
+        builder.templateCustomer(environment::resolvePlaceholders);
 
         return builder.build();
     }

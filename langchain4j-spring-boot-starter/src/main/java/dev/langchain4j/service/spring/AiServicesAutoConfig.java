@@ -19,6 +19,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ import static java.util.Arrays.asList;
 public class AiServicesAutoConfig {
 
     @Bean
-    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
+    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(Environment environment) {
         return beanFactory -> {
 
             // all components available in the application context
@@ -137,6 +138,7 @@ public class AiServicesAutoConfig {
                         "retrievalAugmentor",
                         propertyValues
                 );
+
 
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));

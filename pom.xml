@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.langchain4j</groupId>
+    <groupId>com.github.opensabe</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>0.30.0</version>
+    <version>0.30.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
@@ -167,9 +167,16 @@
     </scm>
 
     <repositories>
+<!--        <repository>-->
+<!--            <id>ossrh-snapshots</id>-->
+<!--            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
         <repository>
-            <id>ossrh-snapshots</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>snapshot-repo</id>
+            <url>https://maven.matchplay.com/repository/maven-snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -177,9 +184,14 @@
     </repositories>
 
     <distributionManagement>
+<!--        <snapshotRepository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>-->
+<!--        </snapshotRepository>-->
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <id>matchplay-snapshots</id>
+            <name>Team Nexus Repository snapshots</name>
+            <url>https://maven.matchplay.com/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
