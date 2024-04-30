@@ -20,10 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
@@ -46,7 +43,7 @@ public class AiServicesAutoConfig {
     }
 
     @Bean
-    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
+    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(List<PromptTemplateCustomizer> customizers) {
         return beanFactory -> {
 
             // all components available in the application context
@@ -56,7 +53,6 @@ public class AiServicesAutoConfig {
             String[] chatMemoryProviders = beanFactory.getBeanNamesForType(ChatMemoryProvider.class);
             String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
             String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
-            String[] templateCustomizers = beanFactory.getBeanNamesForType(PromptTemplateCustomizer.class);
 
             Set<String> tools = new HashSet<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
@@ -86,7 +82,9 @@ public class AiServicesAutoConfig {
                 aiServiceBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(aiServiceClass);
                 MutablePropertyValues propertyValues = aiServiceBeanDefinition.getPropertyValues();
                 AiService aiServiceAnnotation = aiServiceClass.getAnnotation(AiService.class);
-                propertyValues.add("promptTemplateCustomizer", new RuntimeBeanReference(templateCustomizers[0]));
+
+                PromptTemplateCustomizer customizer = customizers.stream().reduce(t -> t, PromptTemplateCustomizer::andThen);
+                propertyValues.add("promptTemplateCustomizer", customizer);
 
                 addBeanReference(
                         ChatLanguageModel.class,
