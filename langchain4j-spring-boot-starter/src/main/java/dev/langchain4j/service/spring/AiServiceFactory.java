@@ -4,18 +4,17 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.input.PromptTemplateCustomizer;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 
 import java.util.List;
 
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
 
-class AiServiceFactory implements FactoryBean<Object>, EnvironmentAware {
+class AiServiceFactory implements FactoryBean<Object> {
 
     private final Class<Object> aiServiceClass;
     private ChatLanguageModel chatLanguageModel;
@@ -25,8 +24,7 @@ class AiServiceFactory implements FactoryBean<Object>, EnvironmentAware {
     private ContentRetriever contentRetriever;
     private RetrievalAugmentor retrievalAugmentor;
     private List<Object> tools;
-    private Environment environment;
-
+    private PromptTemplateCustomizer promptTemplateCustomizer;
     public AiServiceFactory(Class<Object> aiServiceClass) {
         this.aiServiceClass = aiServiceClass;
     }
@@ -59,9 +57,6 @@ class AiServiceFactory implements FactoryBean<Object>, EnvironmentAware {
         this.tools = tools;
     }
 
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
 
     @Override
     public Object getObject() {
@@ -94,7 +89,9 @@ class AiServiceFactory implements FactoryBean<Object>, EnvironmentAware {
             builder = builder.tools(tools);
         }
 
-        builder.templateCustomer(environment::resolvePlaceholders);
+        if (promptTemplateCustomizer != null) {
+            builder.templateCustomer(promptTemplateCustomizer::customer);
+        }
 
         return builder.build();
     }
@@ -107,6 +104,10 @@ class AiServiceFactory implements FactoryBean<Object>, EnvironmentAware {
     @Override
     public boolean isSingleton() {
         return true; // TODO
+    }
+
+    public void setPromptTemplateCustomizer(PromptTemplateCustomizer promptTemplateCustomizer) {
+        this.promptTemplateCustomizer = promptTemplateCustomizer;
     }
 
     /**

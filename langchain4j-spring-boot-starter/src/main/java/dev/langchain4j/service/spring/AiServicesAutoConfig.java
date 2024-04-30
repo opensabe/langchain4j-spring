@@ -6,14 +6,12 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.input.PromptTemplateCustomizer;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import org.reflections.Reflections;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
@@ -38,7 +36,17 @@ import static java.util.Arrays.asList;
 public class AiServicesAutoConfig {
 
     @Bean
-    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(Environment environment) {
+    SPELPromptResolver.SpringStaticHolder springStaticHolder (Environment environment, ConfigurableBeanFactory beanFactory) {
+        return new SPELPromptResolver.SpringStaticHolder(environment, beanFactory);
+    }
+
+    @Bean
+    PromptTemplateCustomizer promptTemplateCustomizer () {
+       return new SPELPromptResolver();
+    }
+
+    @Bean
+    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
         return beanFactory -> {
 
             // all components available in the application context
@@ -48,6 +56,7 @@ public class AiServicesAutoConfig {
             String[] chatMemoryProviders = beanFactory.getBeanNamesForType(ChatMemoryProvider.class);
             String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
             String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
+            String[] templateCustomizers = beanFactory.getBeanNamesForType(PromptTemplateCustomizer.class);
 
             Set<String> tools = new HashSet<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
@@ -76,8 +85,8 @@ public class AiServicesAutoConfig {
                 aiServiceBeanDefinition.setBeanClass(AiServiceFactory.class);
                 aiServiceBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(aiServiceClass);
                 MutablePropertyValues propertyValues = aiServiceBeanDefinition.getPropertyValues();
-
                 AiService aiServiceAnnotation = aiServiceClass.getAnnotation(AiService.class);
+                propertyValues.add("promptTemplateCustomizer", new RuntimeBeanReference(templateCustomizers[0]));
 
                 addBeanReference(
                         ChatLanguageModel.class,
