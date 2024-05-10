@@ -10,6 +10,7 @@ import dev.langchain4j.model.input.PromptTemplateCustomizer;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -58,7 +59,6 @@ public class AiServicesAutoConfig {
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
                     Class<?> beanClass = Class.forName(beanFactory.getBeanDefinition(beanName).getBeanClassName());
-                    System.out.println();
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
                             tools.add(beanName);
@@ -165,7 +165,10 @@ public class AiServicesAutoConfig {
         String[] applicationBean = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
         BeanDefinition applicationBeanDefinition = beanFactory.getBeanDefinition(applicationBean[0]);
         String basePackage = applicationBeanDefinition.getResolvableType().resolve().getPackage().getName();
-        Reflections reflections = new Reflections(basePackage);
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .forPackage(basePackage)
+                .filterInputsBy(path -> path.contains(basePackage))
+        );
         return reflections.getTypesAnnotatedWith(AiService.class);
     }
 
