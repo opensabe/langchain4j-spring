@@ -146,7 +146,6 @@ public class AiServicesAutoConfig {
                         propertyValues
                 );
 
-
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
