@@ -43,7 +43,7 @@
         <dependencies>
 
             <dependency>
-                <groupId>dev.langchain4j</groupId>
+                <groupId>io.github.opensabe-tech</groupId>
                 <artifactId>langchain4j-bom</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
